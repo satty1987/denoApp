@@ -1,4 +1,6 @@
 import { init, MongoClient } from "https://deno.land/x/mongo@v0.6.0/mod.ts";
+import { config } from "https://deno.land/x/dotenv/mod.ts";
+const env = config()
 
 // @ts-ignore
 await init();
@@ -19,8 +21,9 @@ class DB {
         return this.client.database(this.dbName);
     }
 }
-const dbName = Deno.env.get("DB_NAME") || "deno_demo";
-const dbHostUrl = Deno.env.get("DB_HOST_URL") || "mongodb://localhost:27017";
+console.log(env);
+const dbName = env.DB_NAME ||"denodb" ;
+const dbHostUrl =env.DB_HOST_URL || "DB_HOST_URL";
 const db = new DB(dbName, dbHostUrl);
 db.connect();
 

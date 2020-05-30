@@ -1,17 +1,20 @@
-import { Router ,send} from 'https://deno.land/x/oak/mod.ts'
-import { getProducts, getProduct, addProduct, updateProduct, deleteProduct } from './controllers/product.controller.ts'
+import { Router, send } from 'https://deno.land/x/oak/mod.ts'
+import { getaccount, getAccountbyId, createNote, getSingleNote, updateNote, deleteNote } from './controllers/product.controller.ts'
 
 const router = new Router()
 router.get("/", async (context) => {
     await send(context, context.request.url.pathname, {
-      root: `${Deno.cwd()}/`,
-      index: "index.html",
+        root: `${Deno.cwd()}/`,
+        index: "index.html",
     });
-  });
-router.get('/api/v1/products', getProducts)
-    .get('/api/v1/products/:id', getProduct)
-    .post('/api/v1/products', addProduct)
-    .put('/api/v1/products/:id', updateProduct)
-    .delete('/api/v1/products/:id', deleteProduct)
+});
+router
+    .get('/accounts', getaccount)
+    .get("/accounts/:accountid", getAccountbyId)
+    .get('/accounts/:id', getSingleNote)
+    .post('/accounts', createNote)
+    .put('/accounts/:id', updateNote)
+    .delete('/accounts/:id', deleteNote)
+    ;
 
 export default router

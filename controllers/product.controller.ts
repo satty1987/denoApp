@@ -1,118 +1,99 @@
 import db from "../database/db.ts";
-import { v4 } from 'https://deno.land/std/uuid/mod.ts'
-import { Product } from '../interface/types.ts'
+import { RouterContext } from "https://deno.land/x/oak/mod.ts";
+
 const database = db.getDatabase;
-const employees = database.collection("employees");
+const accounts = database.collection("accounts");
+console.log(database);
 
 
-
-let products: Product[] = [
-    {
-        id: "1",
-        name: "Product One",
-        description: "This is product one",
-        price: 29.99,
-    },
-    {
-        id: "2",
-        name: "Product Two",
-        description: "This is product two",
-        price: 39.99,
-    },
-    {
-        id: "3",
-        name: "Product Three",
-        description: "This is product three",
-        price: 59.99,
-    },
-];
-
-// @desc    Get all products
-// @route   GET /api/v1/products
-const getProducts = ({ response }: { response: any }) => {
-    response.body = {
-        success: true,
-        data: products
+const getaccount = async (ctx: RouterContext) => {
+    // Get account from MongoDB
+    try {
+        const account = await accounts.find();
+        ctx.response.body = account;
+        ctx.response.status = 200; 
+    } catch (error) {
+        ctx.response.body = {error: error};
+        ctx.response.status = 500; 
     }
-}
+};
 
-// @desc    Get single product
-// @route   GET /api/v1/products/:id
-const getProduct = ({ params, response }: { params: { id: string }, response: any }) => {
-    const product: Product | undefined = products.find(p => p.id === params.id)
+const getAccountbyId = async (ctx: RouterContext) => {
 
-    if (product) {
-        response.status = 200
-        response.body = {
-            success: true,
-            data: product
-        }
-    } else {
-        response.status = 404
-        response.body = {
-            success: false,
-            msg: 'No product found'
-        }
+    try {
+        const id= ctx.params.accountid
+        const response = await accounts.findOne({ 'accounts_id': id});
+        ctx.response.body = response;
+        ctx.response.status = 200; 
+    } catch (error) {
+        ctx.response.body = {error: error};
+        ctx.response.status = 500;  
     }
-}
 
-// @desc    Add product
-// @route   Post /api/v1/products
-const addProduct = async ({ request, response }: { request: any, response: any }) => {
-    const body = await request.body()
+};
 
-    if (!request.hasBody) {
-        response.status = 400
-        response.body = {
-            success: false,
-            msg: 'No data'
-        }
-    } else {
-        const product: Product = body.value
-        product.id = v4.generate()
-        products.push(product)
-        response.status = 201
-        response.body = {
-            success: true,
-            data: product
-        }
+
+const getSingleNote = async (ctx: RouterContext) => {
+    const id = ctx.params.id;
+    // Get single note
+    const note = await accounts.findOne({ _id: { $oid: id } });
+
+    // Return output
+    ctx.response.body = note;
+};
+
+const createNote = async (ctx: RouterContext) => {
+    // Get title and body from request
+    const { value: { title, body } } = await ctx.request.body();
+    // Create Note object
+    const note: any = {
+        title,
+        body,
+        date: new Date(),
+    };
+    // Insert Note in MongoDB
+    const id = await accounts.insertOne(note);
+
+    note._id = id;
+    // Return with success response
+    ctx.response.status = 201;
+    ctx.response.body = note;
+};
+
+const updateNote = async (ctx: RouterContext) => {
+    const id = ctx.params.id;
+    // Get title and body from request
+    const { value: { title, body } } = await ctx.request.body();
+
+    const { modifiedCount } = await accounts.updateOne(
+        { _id: { $oid: id } },
+        {
+            $set: {
+                title,
+                body,
+            },
+        },
+    );
+
+    if (!modifiedCount) {
+        ctx.response.status = 404;
+        ctx.response.body = { message: "Note does not exist" };
+        return;
     }
-}
 
-// @desc    Update product
-// @route   PUT /api/v1/products/:id
-const updateProduct = async ({ params, request, response }: { params: { id: string }, request: any, response: any }) => {
-    const product: Product | undefined = products.find(p => p.id === params.id)
+    ctx.response.body = await accounts.findOne({ _id: { $oid: id } });
+};
 
-    if (product) {
-        const body = await request.body()
-
-        const updateData: { name?: string; description?: string; price?: number } = body.value
-
-        products = products.map(p => p.id === params.id ? { ...p, ...updateData } : p)
-
-        response.status = 200
-        response.body = {
-            success: true,
-            data: products
-        }
-    } else {
-        response.status = 404
-        response.body = {
-            success: false,
-            msg: 'No product found'
-        }
+const deleteNote = async (ctx: RouterContext) => {
+    const id = ctx.params.id;
+    const count = await accounts.deleteOne({ _id: { $oid: id } });
+    if (!count) {
+        ctx.response.status = 404;
+        ctx.response.body = { message: "Note does not exist" };
+        return;
     }
-}
 
-// @desc    Delete product
-// @route   DELETE /api/v1/products/:id
-const deleteProduct = ({ params, response }: { params: { id: string }, response: any }) => {
-    products = products.filter(p => p.id !== params.id)
-    response.body = {
-        success: true,
-        msg: 'Product removed'
-    }
-}
+    ctx.response.status = 204;
+};
 
-export { getProducts, getProduct, addProduct, updateProduct, deleteProduct }
+export { getaccount,getAccountbyId,  createNote, getSingleNote, updateNote, deleteNote };
