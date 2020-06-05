@@ -22,8 +22,8 @@ class DB {
     }
 }
 console.log(env);
-const dbName = env.DB_NAME ||"denodb" ;
-const dbHostUrl =env.DB_HOST_URL || "DB_HOST_URL";
+const dbName = env.DB_NAME ||"bankmanagement" ;
+const dbHostUrl =env.DB_HOST_URL || "mongodb://admin:admin123@ds137801.mlab.com:37801/bankmanagement";
 const db = new DB(dbName, dbHostUrl);
 db.connect();
 
