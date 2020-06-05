@@ -13,6 +13,7 @@ if (isNaN(port)) {
     console.log("port is not number");
     exit(1);
 }
+console.log("port number " + port);
 
 const app = new Application()
 app.use(organ("short", true));
