@@ -1,6 +1,6 @@
 import { init, MongoClient } from "https://deno.land/x/mongo@v0.6.0/mod.ts";
-import { config } from "https://deno.land/x/dotenv/mod.ts";
-const env = config()
+// import { config } from "https://deno.land/x/dotenv/mod.ts";
+// const env = config()
 
 // @ts-ignore
 await init();
@@ -21,9 +21,9 @@ class DB {
         return this.client.database(this.dbName);
     }
 }
-console.log(env);
-const dbName = env.DB_NAME ||"bankmanagement" ;
-const dbHostUrl =env.DB_HOST_URL || "mongodb://admin:admin123@ds137801.mlab.com:37801/bankmanagement";
+// console.log(env);
+const dbName = "bankmanagement" ;
+const dbHostUrl = "mongodb://admin:admin123@ds137801.mlab.com:37801/bankmanagement";
 const db = new DB(dbName, dbHostUrl);
 db.connect();
 
